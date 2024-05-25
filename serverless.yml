@@ -1,0 +1,37 @@
+service: poc-aws-chatbot-notification
+
+custom:
+  NodeEnv:
+    poc: development
+    dev: development
+    prd: production
+
+provider:
+  name: aws
+  runtime: provided.al2
+  architecture: arm64
+  stage: poc
+  region: sa-east-1
+  memorySize: 128
+  timeout: 3
+  logRetentionInDays: 1
+
+  environment:
+    NODE_ENV: ${self:custom.NodeEnv.${self:provider.stage}}
+
+package:
+  individually: true
+  patterns:
+    - "!./**"
+    - ./bin/**
+
+functions:
+  handler:
+    handler: bootstrap
+    package:
+      artifact: bin/handler.zip
+    events:
+      - http:
+          path: /
+          method: GET
+          cors: true
